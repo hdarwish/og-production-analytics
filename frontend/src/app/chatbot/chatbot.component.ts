@@ -35,7 +35,7 @@ import { HttpClient } from '@angular/common/http';
   styles: [`
     .chatbot-container {
       position: fixed;
-      bottom: 20px;
+      bottom: 0px;
       right: 20px;
       width: 300px;
       background: white;

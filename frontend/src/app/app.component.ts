@@ -30,6 +30,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .navbar {
+      border-radius: 4px;
       background-color: #0014dc;
       padding: 1rem 0;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
