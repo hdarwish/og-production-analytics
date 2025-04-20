@@ -30,8 +30,10 @@ A full-stack web application for visualizing oil and gas production data with in
 ### Backend
 - Python 3.8+
 - FastAPI
-- Pandas
-- CSV data storage
+- PostgreSQL
+- SQLAlchemy
+- Alembic
+- Docker
 
 ### Frontend
 - Angular 17
@@ -47,8 +49,15 @@ oil-production-analytics/
 ├── backend/              # FastAPI backend
 │   ├── app/             # Application code
 │   │   ├── main.py      # FastAPI application
-│   │   └── data/        # Data processing
-│   ├── data/            # Sample data files
+│   │   ├── api/         # API endpoints
+│   │   ├── core/        # Core functionality
+│   │   ├── db/          # Database models and migrations
+│   │   ├── models/      # SQLAlchemy models
+│   │   ├── schemas/     # Pydantic schemas
+│   │   └── services/    # Business logic
+│   ├── alembic/         # Database migrations
+│   ├── Dockerfile       # Backend container definition
+│   ├── docker-compose.yaml # Container orchestration
 │   └── requirements.txt # Python dependencies
 ├── frontend/            # Angular frontend
 │   ├── src/            # Source code
@@ -67,7 +76,19 @@ oil-production-analytics/
 
 ## Setup Instructions
 
-### Backend Setup
+### Option 1: Docker Setup (Recommended)
+```bash
+# Start services
+cd backend
+docker-compose up --build
+
+# Run migrations
+docker-compose exec api alembic upgrade head
+```
+
+### Option 2: Manual Setup
+
+#### Backend Setup
 1. Create a virtual environment:
    ```bash
    python -m venv venv
@@ -80,12 +101,44 @@ oil-production-analytics/
    pip install -r requirements.txt
    ```
 
-3. Run the server:
-   ```bash
-   uvicorn app.main:app --reload
+3. Set up environment variables:
+   Create `.env` file in backend directory with:
+   ```env
+   POSTGRES_SERVER=localhost
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=postgres
+   POSTGRES_DB=og_production
+   POSTGRES_PORT=5432
+   BACKEND_PORT=8000
    ```
 
-### Frontend Setup
+4. Initialize database:
+   ```bash
+   # Make sure PostgreSQL is running
+   alembic upgrade head
+   ```
+
+5. Run the server:
+   ```bash
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+#### Database Setup (Manual)
+```bash
+# 1. Install PostgreSQL
+# Follow your OS-specific installation instructions
+
+# 2. Create database
+createdb og_production
+
+# 3. Create user (if needed)
+createuser -P postgres  # Set password when prompted
+
+# 4. Grant privileges
+psql -d og_production -c "GRANT ALL PRIVILEGES ON DATABASE og_production TO postgres;"
+```
+
+#### Frontend Setup
 1. Install dependencies:
    ```bash
    cd frontend
@@ -104,6 +157,12 @@ oil-production-analytics/
   - Returns well location data
   - Used for map visualization
   - Response includes: well_name, latitude, longitude, region
+- `POST /api/wells`
+  - Create new well
+- `PUT /api/wells/{id}`
+  - Update well data
+- `DELETE /api/wells/{id}`
+  - Delete well
 
 ### Production Data
 - `GET /api/production`
@@ -114,6 +173,30 @@ oil-production-analytics/
     - well_name: Filter by well name
     - region: Filter by region
   - Response includes: well_name, date, production_volume, region
+- `POST /api/production`
+  - Create new production record
+- `PUT /api/production/{id}`
+  - Update production data
+- `DELETE /api/production/{id}`
+  - Delete production record
+
+## Security Features
+- Environment variable management
+- Database credentials protection
+- CORS configuration
+- Input validation
+- Error handling
+- Secure API endpoints
+
+## Performance Optimizations
+- Database indexing
+- Query optimization
+- Lazy loading for map component
+- Efficient data processing
+- Cached preflight requests
+- Optimized API responses
+- Container resource management
+
 
 ### Chatbot
 - `POST /api/chatbot`
@@ -121,17 +204,6 @@ oil-production-analytics/
   - Request body: { message: string }
   - Returns predefined responses
 
-## Security Features
-- CORS configuration with specific origins
-- Input validation
-- Error handling
-- Secure API endpoints
-
-## Performance Optimizations
-- Lazy loading for map component
-- Efficient data processing
-- Cached preflight requests
-- Optimized API responses
 
 ## License
 

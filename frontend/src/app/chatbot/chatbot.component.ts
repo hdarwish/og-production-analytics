@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-chatbot',
@@ -121,6 +122,7 @@ export class ChatbotComponent implements OnInit {
   isOpen = false;
   userMessage = '';
   messages: { text: string; isUser: boolean }[] = [];
+  isLoading = false;
 
   constructor(private http: HttpClient) {}
 
@@ -137,33 +139,29 @@ export class ChatbotComponent implements OnInit {
   }
 
   sendMessage() {
-    if (this.userMessage.trim()) {
-      // Add user message
-      this.messages.push({
-        text: this.userMessage,
-        isUser: true
-      });
+    if (!this.userMessage.trim()) return;
 
-      // Get chatbot response
-      this.http.post<{ response: string }>('http://localhost:8000/api/chatbot', {
-        message: this.userMessage
-      }).subscribe({
-        next: (data) => {
-          this.messages.push({
-            text: data.response,
-            isUser: false
-          });
-        },
-        error: (error) => {
-          console.error('Error getting chatbot response:', error);
-          this.messages.push({
-            text: "Sorry, I'm having trouble connecting to the server. Please try again later.",
-            isUser: false
-          });
-        }
-      });
+    const userMessage = this.userMessage;
+    this.messages.push({ text: userMessage, isUser: true });
+    this.userMessage = '';
+    this.isLoading = true;
 
-      this.userMessage = '';
-    }
+    this.http.post<{ response: string }>(`${environment.apiUrl}/chatbot`, {
+      message: userMessage
+    }).subscribe({
+      next: (data) => {
+        this.messages.push({
+          text: data.response,
+          isUser: false
+        });
+      },
+      error: (error) => {
+        console.error('Error getting chatbot response:', error);
+        this.messages.push({
+          text: "Sorry, I'm having trouble connecting to the server. Please try again later.",
+          isUser: false
+        });
+      }
+    });
   }
 } 

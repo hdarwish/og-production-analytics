@@ -7,20 +7,8 @@ import { ProductionChartComponent } from '../production-chart/production-chart.c
 import { RegionalChartComponent } from '../regional-chart/regional-chart.component';
 import { FilterFormComponent } from '../filter-form/filter-form.component';
 import { ChatbotComponent } from '../chatbot/chatbot.component';
-
-interface FilterCriteria {
-  startDate: string;
-  endDate: string;
-  region: string;
-  wellName: string;
-}
-
-interface ProductionData {
-  well_name: string;
-  date: string;
-  production_volume: number;
-  region: string;
-}
+import { environment } from '../../environments/environment';
+import { ProductionData, FilterCriteria } from '../shared/models';
 
 @Component({
   selector: 'app-dashboard',
@@ -263,6 +251,12 @@ export class DashboardComponent {
     }
   }
 
+  refreshData() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.fetchProductionData();
+    }
+  }
+
   toggleChatbot() {
     this.isChatbotOpen = !this.isChatbotOpen;
     if (this.isChatbotOpen) {
@@ -283,7 +277,7 @@ export class DashboardComponent {
   private getChatbotResponse(message: string) {
     if (!isPlatformBrowser(this.platformId)) return;
     
-    this.http.post<{ response: string }>('http://localhost:8000/api/chatbot', { message })
+    this.http.post<{ response: string }>(`${environment.apiUrl}/chatbot`, { message })
       .subscribe({
         next: (data) => {
           this.chatMessages.push({ text: data.response, isUser: false });
@@ -302,7 +296,7 @@ export class DashboardComponent {
     if (!isPlatformBrowser(this.platformId)) return;
 
     this.isLoading = true;
-    let url = 'http://localhost:8000/api/production';
+    let url = `${environment.apiUrl}/production`;
     if (filters) {
       const params = new URLSearchParams();
       if (filters.startDate) params.append('start_date', filters.startDate);
@@ -312,8 +306,12 @@ export class DashboardComponent {
       url += `?${params.toString()}`;
     }
     
+    console.log('Fetching production data from:', url);
+    
     this.http.get<ProductionData[]>(url).subscribe({
       next: (data) => {
+        console.log('Received filtered production data:', data);
+        console.log('Data length:', data.length);
         this.productionData = data;
         this.lastUpdated = new Date();
       },

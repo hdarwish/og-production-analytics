@@ -3,13 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import * as L from 'leaflet';
-
-interface ProductionData {
-  well_name: string;
-  latitude: number;
-  longitude: number;
-  region: string;
-}
+import { environment } from '../../environments/environment';
+import { WellData } from '../shared/models';
 
 @Component({
   selector: 'app-map',
@@ -138,7 +133,7 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     if (this.isBrowser) {
-      this.loadProductionData();
+      this.loadWellData();
     }
   }
 
@@ -151,9 +146,9 @@ export class MapComponent implements OnInit {
     });
   }
 
-  private loadProductionData() {
-    console.log('Loading production data...');
-    this.http.get<ProductionData[]>('http://localhost:8000/api/wells')
+  private loadWellData() {
+    console.log('Loading well data...');
+    this.http.get<WellData[]>(`${environment.apiUrl}/wells`)
       .subscribe({
         next: (data) => {
           console.log('Raw data received:', JSON.stringify(data, null, 2));
@@ -161,7 +156,7 @@ export class MapComponent implements OnInit {
           // Validate and clean the data
           const validData = data.filter(item => {
             const isValid = item && 
-              typeof item.well_name === 'string' &&
+              typeof item.name === 'string' &&
               typeof item.latitude === 'number' && 
               typeof item.longitude === 'number' &&
               typeof item.region === 'string';
@@ -185,13 +180,15 @@ export class MapComponent implements OnInit {
           });
         },
         error: (error) => {
-          console.error('Error loading production data:', error);
+          console.error('Error loading well data:', error);
         }
       });
   }
 
-  private addMarkers(data: ProductionData[]) {
+  private addMarkers(data: WellData[]) {
     console.log('Adding markers...');
+    console.log('Input data:', JSON.stringify(data, null, 2));
+    
     // Clear existing layers
     this.layers = [];
     
@@ -201,12 +198,13 @@ export class MapComponent implements OnInit {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     });
     this.layers.push(baseLayer);
+    console.log('Base layer added');
     
     // Add markers
     data.forEach(item => {
       try {
         if (item.latitude && item.longitude) {
-          console.log('Creating marker for:', item.well_name, 'at', item.latitude, item.longitude);
+          console.log('Creating marker for:', item.name, 'at', item.latitude, item.longitude);
           const latLng = L.latLng(item.latitude, item.longitude);
           
           const marker = L.marker(latLng, {
@@ -221,32 +219,41 @@ export class MapComponent implements OnInit {
             })
           }).bindPopup(`
             <div class="popup-content">
-              <h4>${item.well_name}</h4>
+              <h4>${item.name}</h4>
               <p><strong>Region:</strong> ${item.region}</p>
             </div>
           `);
           
           this.layers.push(marker);
-          console.log('Marker added to layers:', marker);
+          console.log('Marker added to layers:', marker.getLatLng());
+        } else {
+          console.warn('Invalid coordinates for well:', item.name, 'lat:', item.latitude, 'lng:', item.longitude);
         }
       } catch (error) {
-        console.error('Error creating marker for well:', item.well_name, error);
+        console.error('Error creating marker for well:', item.name, error);
       }
     });
 
-    console.log('Final layers array:', this.layers);
+    console.log('Final layers array length:', this.layers.length);
+    console.log('Map bounds:', this.map.getBounds());
   }
 
-  private fitBounds(data: ProductionData[]) {
+  private fitBounds(data: WellData[]) {
     console.log('Fitting bounds...');
+    const validPoints = data.filter(item => item.latitude && item.longitude);
+    console.log('Valid points count:', validPoints.length);
+    
+    if (validPoints.length === 0) {
+      console.error('No valid points to fit bounds');
+      return;
+    }
+    
     const bounds = L.latLngBounds(
-      data
-        .filter(item => item.latitude && item.longitude)
-        .map(item => L.latLng(item.latitude, item.longitude))
+      validPoints.map(item => L.latLng(item.latitude, item.longitude))
     );
     
     if (!bounds.isValid()) {
-      console.log('Invalid bounds');
+      console.error('Invalid bounds:', bounds);
       return;
     }
 

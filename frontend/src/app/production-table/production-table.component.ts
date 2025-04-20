@@ -1,12 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface ProductionData {
-  well_name: string;
-  date: string;
-  production_volume: number;
-  region: string;
-}
+import { ProductionData } from '../shared/models';
 
 @Component({
   selector: 'app-production-table',
@@ -20,18 +14,18 @@ interface ProductionData {
           <table class="table">
             <thead>
               <tr>
-                <th class="text-left">Name</th>
-                <th class="text-left">Volume</th>
+                <th class="text-left">Well Name</th>
+                <th class="text-left">Oil Volume</th>
                 <th class="text-left">Region</th>
                 <th class="text-left">Date</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let item of data">
-                <td>{{ item.well_name }}</td>
-                <td>{{ item.production_volume | number:'1.0-2' }}</td>
-                <td>{{ item.region }}</td>
-                <td>{{ item.date | date }}</td>
+                <td class="text-left">{{ item.well_name }}</td>
+                <td class="text-left">{{ item.oil_volume | number:'1.0-2' }}</td>
+                <td class="text-left">{{ item.region }}</td>
+                <td class="text-left">{{ item.date | date }}</td>
               </tr>
             </tbody>
           </table>
@@ -54,6 +48,9 @@ interface ProductionData {
     }
     .text-left {
       text-align: left !important;
+    }
+    .text-right {
+      text-align: right !important;
     }
   `]
 })

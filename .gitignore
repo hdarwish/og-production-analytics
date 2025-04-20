@@ -18,6 +18,12 @@ yarn-error.log
 pnpm-debug.log*
 
 # Backend
+alembic.ini
+# Environment variables
+.env
+
+# Docker volumes
+postgres_data/
 venv/
 backend/venv/
 **/__pycache__/

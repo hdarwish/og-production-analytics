@@ -1,13 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { CommonModule } from '@angular/common';
-
-interface ProductionData {
-  well_name: string;
-  date: string;
-  production_volume: number;
-  region: string;
-}
+import { ProductionData } from '../shared/models';
 
 interface ChartData {
   name: string;
@@ -78,7 +72,7 @@ export class ProductionChartComponent implements OnChanges {
     
     this.data.forEach(item => {
       const currentTotal = dateMap.get(item.date) || 0;
-      dateMap.set(item.date, currentTotal + item.production_volume);
+      dateMap.set(item.date, currentTotal + item.oil_volume);
     });
 
     // Convert to bar chart format and sort by date
