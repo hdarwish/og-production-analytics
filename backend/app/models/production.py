@@ -1,9 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, Float, Date, ForeignKey
 from sqlalchemy.orm import relationship
-from app.db.base_class import Base
-
-Base = declarative_base()
+from app.db.base import Base
 
 class ProductionData(Base):
     __tablename__ = "production_data"

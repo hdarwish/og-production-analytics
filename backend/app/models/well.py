@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.orm import relationship
-from app.db.base_class import Base
+from app.db.base import Base
 
 class Well(Base):
     __tablename__ = "wells"
@@ -9,8 +9,5 @@ class Well(Base):
     name = Column(String, unique=True, index=True)
     latitude = Column(Float)
     longitude = Column(Float)
-    field = Column(String, index=True)
-    operator = Column(String, index=True)
-    production_rate = Column(Float)
-    last_updated = Column(DateTime)
+    region = Column(String, index=True)
     production_data = relationship("ProductionData", back_populates="well") 

@@ -14,11 +14,15 @@ class Settings(BaseSettings):
     DATA_DIR: str = "data"
     SAMPLE_DATA_FILE: str = "sample_data.csv"
     
-    POSTGRES_SERVER: str = "localhost"
-    POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
-    POSTGRES_DB: str = "og_production"
-    POSTGRES_PORT: str = "5432"
+    # Server settings
+    BACKEND_PORT: str = "8000"
+    
+    # Database settings
+    POSTGRES_SERVER: str 
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str 
+    POSTGRES_DB: str 
+    POSTGRES_PORT: str
     
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
     
@@ -29,6 +33,7 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
+        extra = "allow"  # Allow extra fields in environment variables
 
 @lru_cache()
 def get_settings() -> Settings:

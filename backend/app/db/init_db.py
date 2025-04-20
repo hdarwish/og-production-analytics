@@ -1,12 +1,13 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from app.core.config import settings
+from sqlalchemy.orm import Session
 
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from app.db.base import Base
+from app.db.session import engine
+from app.db.seed import seed_database
 
-def init_db() -> None:
-    from app.db.base_class import Base
-    from app.db.models import Well, ProductionData
+def init_db(db: Session) -> None:
+    """Initialize the database with tables and seed data."""
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
     
-    Base.metadata.create_all(bind=engine) 
+    # Seed the database with sample data
+    seed_database(db) 

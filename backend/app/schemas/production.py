@@ -16,8 +16,11 @@ class ProductionDataUpdate(ProductionDataBase):
     well_id: Optional[int] = None
     date: Optional[date] = None
 
-class ProductionData(ProductionDataBase):
-    id: int
+class ProductionDataResponse(BaseModel):
+    well_name: str
+    date: date
+    oil_volume: Optional[float] = None
+    region: str
 
     class Config:
         from_attributes = True

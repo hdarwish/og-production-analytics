@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from app.core.config import settings
 from app.api.v1.router import api_router
+from app.db.session import SessionLocal
 from app.db.init_db import init_db
 from app.core.logging import setup_logging
 
@@ -32,13 +33,18 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 # Create data directory if it doesn't exist
 os.makedirs(settings.DATA_DIR, exist_ok=True)
 
+# Initialize database and seed data
 @app.on_event("startup")
-async def startup_event():
+def startup_event():
     """
     Initialize the database on startup.
     """
     logger.info("Initializing database")
-    init_db()
+    db = SessionLocal()
+    try:
+        init_db(db)
+    finally:
+        db.close()
     logger.info("Database initialized successfully")
 
 @app.get("/")

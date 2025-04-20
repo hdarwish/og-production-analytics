@@ -1,12 +1,12 @@
 from typing import Generator
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.db.deps import get_db
 
 # Database dependency
-def get_db_dependency() -> Generator[Session, None, None]:
+def get_db_dependency() -> Session:
     """
     Get database session dependency.
     """
-    return get_db()
+    return Depends(get_db)

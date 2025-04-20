@@ -1,13 +1,9 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface FilterCriteria {
-  startDate: string;
-  endDate: string;
-  region: string;
-  wellName: string;
-}
+import { HttpClient } from '@angular/common/http';
+import { FilterCriteria, ProductionData } from '../shared/models';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-filter-form',
@@ -43,10 +39,8 @@ interface FilterCriteria {
               [(ngModel)]="filters.region"
               class="filter-input">
               <option value="">All Regions</option>
-              <option value="North">North</option>
-              <option value="South">South</option>
-              <option value="East">East</option>
-              <option value="West">West</option>
+              <option value="Abu Dhabi">Abu Dhabi</option>
+              <option value="Dubai">Dubai</option>
             </select>
           </div>
           <div class="filter-group">
@@ -61,6 +55,7 @@ interface FilterCriteria {
           </div>
           <div class="filter-group">
             <button type="submit" class="filter-button">Apply Filters</button>
+            <button type="button" class="filter-button reset-button" (click)="resetFilters()">Reset</button>
           </div>
         </div>
       </form>
@@ -135,6 +130,7 @@ interface FilterCriteria {
       font-weight: 500;
       transition: all 0.3s ease;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-right: 0.5rem;
     }
 
     .filter-button:hover {
@@ -146,6 +142,14 @@ interface FilterCriteria {
     .filter-button:active {
       transform: translateY(0);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .reset-button {
+      background-color: #6c757d;
+    }
+
+    .reset-button:hover {
+      background-color: #5a6268;
     }
 
     @media (max-width: 768px) {
@@ -171,6 +175,17 @@ export class FilterFormComponent {
   };
 
   onSubmit() {
+    console.log('Applying filters:', this.filters);
+    this.filtersChanged.emit(this.filters);
+  }
+
+  resetFilters() {
+    this.filters = {
+      startDate: '',
+      endDate: '',
+      region: '',
+      wellName: ''
+    };
     this.filtersChanged.emit(this.filters);
   }
 }

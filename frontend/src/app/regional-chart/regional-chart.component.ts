@@ -1,12 +1,6 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { NgxChartsModule, LegendPosition } from '@swimlane/ngx-charts';
-
-interface ProductionData {
-  well_name: string;
-  date: string;
-  production_volume: number;
-  region: string;
-}
+import { ProductionData } from '../shared/models';
 
 @Component({
   selector: 'app-regional-chart',
@@ -75,8 +69,9 @@ export class RegionalChartComponent implements OnChanges {
     // Sum production by region
     this.data.forEach(item => {
       const currentValue = regionMap.get(item.region) || 0;
-      regionMap.set(item.region, currentValue + item.production_volume);
+      regionMap.set(item.region, currentValue + item.oil_volume);
     });
+
 
     // Convert to chart format
     this.chartData = Array.from(regionMap.entries()).map(([region, volume]) => ({
